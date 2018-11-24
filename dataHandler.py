@@ -1,55 +1,47 @@
-#
-
 import instaloader
+
 
 class dataHandler:
 
-	def login(self, user, password):
-		
-		self.user = user
-		self.password = password
+    def login(self, user, password):
 
-		global loader
-		loader = instaloader.Instaloader()
-		loader.login(user, password)
+        self.user = user
+        self.password = password
 
-		USER = user
-		PROFILE = USER
-		profile = instaloader.Profile.from_username(loader.context, PROFILE)
+        self.loader = instaloader.Instaloader()
+        self.loader.login(user, password)
 
-	def getHashtagData(self, hashtag, limit):
-		self.limit = limit
-		users = []
-		for post in loader.get_hashtag_posts(hashtag):
-			if not post:
-				print("No users found")
-				break
-			users.append(post.owner_username)
-		my_set = set(users)
-		count = 0
-		if (len(my_set) > 0):
-			users_file = open('user.txt', 'w+')
-			for item in my_set:
-				if count != limit:
-					users_file.write(item+'\n')
-					count = count + 1
-			print("done")
-		else:
-			print("no users found")
+    def getHashtagData(self, hashtag, limit, filePath, atMark):
+        if not limit:
+            self.limit = 100
+        self.limit = int(limit)
+        users = []
 
-	
-	def findDuplicate(self, u):
-		for line in open('user.txt', 'r'):
-			if line.rstrip('\n') == u:
-				return False
-		return True
-		
+        postCount = 0
+        for post in self.loader.get_hashtag_posts(hashtag):
+            if not post:
+                print("No users found")
+                break
+            if postCount == self.limit:
+                break
 
+            users.append(post.owner_username)
+            postCount = postCount + 1
+        my_set = set(users)
+        atValue = ''
 
-obj = dataHandler()
+        if filePath:
+            fileName = filePath
+        else:
+            fileName = 'users_hashtag_posts.txt'
 
-obj.login("","")
-obj.getHashtagData('', 10)
+        if int(atMark) == 1:
+            atValue = '@'
 
-
-
+        if (len(my_set) > 0):
+            users_file = open(fileName, 'w+')
+            for item in my_set:
+                users_file.write(atValue + item + '\n')
+            print("done")
+        else:
+            print("no users found")
