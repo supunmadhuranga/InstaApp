@@ -1,5 +1,6 @@
 import instaloader
-
+import time
+import random
 
 class dataHandler:
 
@@ -11,37 +12,39 @@ class dataHandler:
         self.loader = instaloader.Instaloader()
         self.loader.login(user, password)
 
-    def getHashtagData(self, hashtag, limit, filePath, atMark):
+    def getHashtagData(self, hashtag, limit, atMark):
         if not limit:
             self.limit = 100
         self.limit = int(limit)
-        users = []
-
+        atValue = ''
+        fileName = 'C:\\Users\\Name\\Documents\\file.txt'
+        if int(atMark) == 1:
+            atValue = '@'
+			
         postCount = 0
-        for post in self.loader.get_hashtag_posts(hashtag):
+        users_file = open(fileName, 'w+')
+        posts = self.loader.get_hashtag_posts(hashtag)
+        for post in posts:
+            postUsername = ''
+            noError = True
             if not post:
                 print("No users found")
                 break
             if postCount == self.limit:
                 break
+            try:
+                postUsername = post.owner_username
+            except Exception as e:
+                print(e)
+                noError = False
 
-            users.append(post.owner_username)
-            postCount = postCount + 1
-        my_set = set(users)
-        atValue = ''
-
-        if filePath:
-            fileName = filePath
-        else:
-            fileName = 'users_hashtag_posts.txt'
-
-        if int(atMark) == 1:
-            atValue = '@'
-
-        if (len(my_set) > 0):
-            users_file = open(fileName, 'w+')
-            for item in my_set:
-                users_file.write(atValue + item + '\n')
-            print("done")
-        else:
-            print("no users found")
+            if noError:
+                users_file.write(atValue + postUsername + '\n')
+                postCount = postCount + 1
+                print(postCount)
+            if postCount % 100 == 0:
+                time.sleep(random.randint(2, 5))
+        users_file.close()
+        self.loader.close()
+        print("done")
+        
