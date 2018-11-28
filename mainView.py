@@ -10,15 +10,18 @@ def handleStartBtn():
     hashTag = ents[2][1].get().strip()
     userLmt = ents[3][1].get().strip()
     atMark = var1.get()
+    isCommentedUser = var2.get()
 
     if uname1 and pwd1 and hashTag:
-        #try:
         dh = dataHandler()
-        dh.login(uname1, pwd1)
-        dh.getHashtagData(hashTag, userLmt, atMark)
-        #except:
-            #messagebox.showinfo("Error", "Some error.")
-            #sys.exit()
+        try:
+            dh.login(uname1, pwd1)
+            dh.getHashtagData(hashTag, userLmt, atMark, isCommentedUser)
+        except Exception as e:
+            print(e)
+            dh.users_file.close()
+            dh.loader.close()
+            sys.exit()
     else:
         messagebox.showinfo("Error", "Provide username, password or hash tag.")
 
@@ -31,20 +34,17 @@ def handleStopBtn():
 
 def makeform(root):
     entries = []
-    global var1
+    global var1, var2
     var1 = IntVar()
-    for field in range(1, 7):
+    var2 = IntVar()
+    for field in range(1, 8):
         row = Frame(root)
         row.pack(side=TOP, padx=5, pady=2)
         if field == 1:
             userNameLab = Label(row, text="Username", fg="#383a39", font=("Helvetica", 12))
-
             userNameLab.pack(side=LEFT)
-
-
             userNameEnt = Entry(row, width=40)
             entries.append(('username' + str(field), userNameEnt))
-
             userNameEnt.pack(side=LEFT, fill=X)
 
         if field == 2:
@@ -74,6 +74,11 @@ def makeform(root):
             chkBtn.pack()
 
         if field == 6:
+            chkBtn1 = Checkbutton(row, text="Commented users of posts", variable=var2)
+            entries.append(('isCommentedUser' + str(field), chkBtn1))
+            chkBtn1.pack()
+
+        if field == 7:
             b1 = Button(window, text='Download', command=startBtnClick)
             b1.pack(side=RIGHT, padx=5, pady=2)
 
